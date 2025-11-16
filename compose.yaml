@@ -1,0 +1,24 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: simplejobbot-ollama
+    volumes:
+      - ./ollama:/root/.ollama
+    # Override entrypoint so we can run a shell script, not "ollama sh ..."
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "ollama serve & sleep 5 && ollama pull llama3 && wait"
+
+  simplejobbot:
+    build: .
+    container_name: simplejobbot-app
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - JOBBOT_MODEL=llama3
+      - HOST_OUTPUT_ROOT=./job-packages
+    volumes:
+      - ./job-packages:/app/output
+    ports:
+      - "8000:8000"
