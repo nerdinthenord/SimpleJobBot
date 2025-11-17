@@ -1,0 +1,61 @@
+Simple Job Bot Personal Use License v1.1  
+
+Copyright (c) 2025 The Simple Job Bot project
+
+Permission is granted to any person who obtains a copy of this software and associated documentation files (the “Software”) to:
+
+1. Use the Software for personal and private purposes.  
+2. Run the Software on their own computers and devices.  
+3. Modify the Software for their own personal use.  
+4. Keep a private copy of the Software and any personal changes.  
+
+Subject to the following conditions:
+
+1. The Software may not be sold.  
+2. The Software may not be used for any commercial purpose. This includes, without limitation:  
+   a. Selling copies of the Software.  
+   b. Charging money to host or provide the Software as a service.  
+   c. Using the Software as part of any paid product or paid service.  
+3. Any public fork or public copy of the Software must include this license and the above copyright notice.  
+4. Anyone who redistributes the Software must do so only under this same license.  
+
+You may:
+
+1. Share links to this repository.  
+2. Share your personal results or files produced by your own use of the Software.  
+3. Suggest changes or improvements through pull requests, issues, or other feedback.  
+
+You may not:
+
+1. Remove the copyright notice from the Software.  
+2. Claim that you wrote the original Software.  
+3. Use the Software to build a paid product or paid service.  
+4. Relicense the Software under a different license.  
+
+THIRD PARTY OPEN SOURCE COMPONENTS
+
+This project uses third party open source software and tools. Examples include, but are not limited to:
+
+1. Python packages listed in requirements.txt such as FastAPI, Uvicorn, Pydantic, httpx, and others.  
+2. Docker and Docker related tooling used to run the containers.  
+3. The Ollama server and any models you run with it.  
+
+Each third party component remains under its own license from its original authors.  
+This license does not change, weaken, or override those third party licenses in any way.  
+
+When you use, modify, or redistribute this project, you are responsible for:
+
+1. Reviewing the licenses of any third party components used by this project.  
+2. Complying with all terms and conditions of those third party licenses.  
+3. Not using this project in any way that would violate those licenses.  
+
+If there is any conflict between this license and a third party license, the third party license controls for that third party component.  
+
+DISCLAIMER OF WARRANTY
+
+The Software is provided “as is”, without warranty of any kind, express or implied.  
+Without limiting the generality of the foregoing, the authors do not warrant that the Software will be error free or fit for any particular purpose.  
+
+LIMITATION OF LIABILITY
+
+In no event shall the authors be liable for any claim, damages, or other liability arising from, out of, or in connection with the Software or the use of the Software.  
