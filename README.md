@@ -1,5 +1,20 @@
 # Simple Job Bot
 
+## About this project
+
+This is not a showcase of perfect programming or advanced engineering.
+
+Simple Job Bot was vibe coded as a personal project to explore
+
+* basic architecture and splitting things into small services
+* running everything locally in Docker
+* keeping data on your own machine and thinking about security first
+* using a local AI model with simple guard rails and clear prompts
+
+The goal is to keep it small, local, and easy to understand.
+It is an example of how to wire tools together, not a polished product or a production grade template.
+
+##What it does
 Simple Job Bot is a local job application helper that runs fully inside Docker and uses an Ollama model to write job specific material for you.
 
 It generates
