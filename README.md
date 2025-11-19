@@ -135,7 +135,6 @@ To stop the stack later
 ```bash
 docker compose down
 ```
-
 On first run Docker will start
 
 * The Ollama container, which exposes the Ollama HTTP API inside the Compose network
