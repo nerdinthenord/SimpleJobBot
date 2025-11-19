@@ -1,128 +1,181 @@
+````markdown
 # Simple Job Bot
 
-## About this project
+Simple Job Bot is a small local web app that helps you tailor job applications using a local Ollama model, all running in Docker.
 
-This is not a showcase of perfect programming or advanced engineering.
+You paste your resume and a job description into a web page and it generates
 
-Simple Job Bot was vibe coded as a personal project to explore
+* A job specific resume  
+* A job specific cover letter  
+* Three short written answers for common application questions  
+* A simple fit score and label  
 
-* basic architecture and splitting things into small services
-* running everything locally in Docker
-* keeping data on your own machine and thinking about security first
-* using a local AI model with simple guard rails and clear prompts
+All output lives in plain text files under a local `job-packages` folder inside this project. Nothing is sent to any external API.
 
-The goal is to keep it small, local, and easy to understand.
-It is an example of how to wire tools together, not a polished product or a production grade template.
+## What this project is and is not
 
-## What it does
-Simple Job Bot is a local job application helper that runs fully inside Docker and uses an Ollama model to write job specific material for you.
+This is not meant to be a perfect example of production grade code.
 
-It generates
+It is a vibe coded project that exists to show
 
-* A job specific resume
-* A job specific cover letter
-* A short fit explanation and score
-* Three short written answers for typical application questions
+* A simple split between a web app container and a model container  
+* Local LLM usage through Ollama with no cloud calls  
+* Guardrails for truthful, non fabricated output  
+* Basic architecture, microservice style separation, and security conscious defaults  
 
-All output files are stored locally inside this project so you keep full control of your data.
+If you want to fork it and clean up the code, add tests, or redesign the UI, go ahead. The point is that the moving parts are understandable.
 
----
+## Behavior and guardrails
 
-## What you need
+The prompts and helpers are written to keep the model under control.
 
-You must have
+### Resume behavior
 
-* Docker Desktop installed
-* Docker Compose available through Docker Desktop
-* An internet connection the first time the model downloads inside the Ollama container
+The resume generator
 
-You do not need Ollama installed on your host.
-This project runs the official `ollama/ollama` container and stores all models inside the local `ollama` folder.
+* Aims for roughly two pages of text, about nine hundred to eleven hundred words  
+* Includes every role from the base resume  
+* Compresses older roles into shorter bullets instead of dropping them  
+* Uses only facts from your pasted resume and the job description  
+* Does not invent employers, job titles, dates, locations, tools, certifications, numbers, or metrics  
+* Does not mention AI or tools in the resume  
+* Uses a direct, professional tone rather than generic AI style wording  
 
----
+### Cover letter behavior
+
+The cover letter generator
+
+* Writes a single page letter  
+* Uses three to six concise paragraphs  
+* References only experience that exists in your resume or is clearly implied by the job description  
+* Avoids made up numbers and dramatic claims  
+* Keeps the tone grounded and human and avoids obvious AI buzzwords  
+
+### Short answer behavior
+
+The short answer generator
+
+* Produces three short answers for common application questions  
+* Grounds all content in your actual experience from the resume  
+* Does not fabricate achievements or specific metrics  
+* Keeps each answer to three to six sentences  
+
+Across all three generators the instructions say clearly
+
+* Do not lie  
+* Do not guess unknown facts  
+* Do not mention AI, ChatGPT, language models, or tooling  
+
+## Stack overview
+
+Simple Job Bot runs as two containers using Docker Compose
+
+* `simplejobbot-app`  
+  * FastAPI app that serves the web interface on `http://localhost:8000`  
+  * Handles the form, file management, and simple diagnostics  
+  * Talks to Ollama over HTTP inside the Docker network  
+
+* `simplejobbot-ollama`  
+  * Official `ollama/ollama` image  
+  * Serves the configured model  
+  * Stores model files under the local `./ollama` folder  
+
+Default model
+
+* `llama3.2:3b`  
+
+This model name is controlled by the `JOBBOT_MODEL` environment variable in `compose.yaml`.
+
+## Requirements
+
+You need
+
+* Docker Desktop installed on your machine  
+* Docker Compose available through Docker Desktop  
+* A machine with at least sixteen gigabytes of memory for a comfortable experience  
+* An internet connection the first time the model is downloaded into the Ollama container  
+
+You do not need Ollama installed on the host. The project runs the official `ollama/ollama` container and stores model data in the local `ollama` folder inside this repository.
+
+## System resources
+
+Simple Job Bot uses an LLM through Ollama. Performance and stability depend on
+
+* How much memory Docker is allowed to use  
+* How many CPU cores Docker is allowed to use  
+* The chosen model size  
+
+The default model is `llama3.2:3b` to balance quality and speed on CPU.
+
+Suggested settings for Docker Desktop
+
+* Memory at least eight gigabytes  
+* Four or more virtual CPUs  
+
+If you see errors in the Ollama logs about memory limitations, either lower the model size or increase the Docker memory limit in Docker Desktop settings.
 
 ## Quick start
 
-To clone and start Simple Job Bot
+Clone the repository and start the stack
 
-```
+```bash
 git clone https://github.com/nerdinthenord/SimpleJobBot.git
 cd SimpleJobBot
 docker compose up -d
-```
+````
 
 Then open this address in your browser
 
-```
+```text
 http://localhost:8000
 ```
 
-To stop it later
+To stop the stack later
 
-```
+```bash
 docker compose down
 ```
 
 On first run Docker will start
 
-* The Ollama container, which exposes the Ollama API inside the Docker network
-* The Simple Job Bot container, which exposes a web interface on port 8000
+* The Ollama container, which exposes the Ollama HTTP API inside the Compose network
+* The Simple Job Bot container, which exposes the web interface on port 8000
 
-The Ollama container will download the configured model the first time it is used. This may take some time on the very first job you run.
-
-The default model used by this project is
-
-```
-llama3.2:3b
-```
-
-This is configured in `compose.yaml` and gives a good balance of quality and performance for resume and cover letter writing.
-
----
+The Ollama container will download the configured model the first time it is requested. The first job can take a bit longer while the model is loaded.
 
 ## Start and stop helper scripts
 
-This repository includes two helper scripts so you do not have to remember Docker commands
+Two helper scripts let you start and stop the stack without remembering Docker commands.
 
-* `start_simplejobbot.sh` to start the stack in the background
-* `stop_simplejobbot.sh` to stop and clean up
+From the `SimpleJobBot` folder, make the scripts executable once
 
-From the `SimpleJobBot` folder make the scripts executable once
-
-```
+```bash
 chmod +x start_simplejobbot.sh stop_simplejobbot.sh
 ```
 
-To start Simple Job Bot
+To start Simple Job Bot in the background
 
-```
+```bash
 ./start_simplejobbot.sh
 ```
 
-This runs `docker compose up -d` behind the scenes and brings up the app at `http://localhost:8000`.
+This runs `docker compose up -d` and prints a message when the app is ready at `http://localhost:8000`.
 
 To stop Simple Job Bot
 
-```
+```bash
 ./stop_simplejobbot.sh
 ```
 
-This runs `docker compose down` and stops both the application container and the Ollama container.
+This runs `docker compose down` and stops both containers.
 
-You can always use the raw Docker commands instead if you prefer
-
-```
-docker compose up -d
-docker compose down
-```
-
----
+You can always use the raw Docker commands instead if you prefer.
 
 ## Using the web interface
 
 Once the stack is running, open
 
-```
+```text
 http://localhost:8000
 ```
 
@@ -134,17 +187,17 @@ You will see
 To generate a package for a new job
 
 1. Paste your resume text into the first large text area
-2. Fill in the company name, role title, and any other fields shown
-3. Paste the job description into the second large text area
-4. Select the seniority hint if the form offers it
-5. Click the button to generate the package
+2. Enter the company name, role title, and location
+3. Choose a seniority hint if relevant
+4. Paste the job description into the second large text area
+5. Submit the form
 
-While the model is running the page will show a status message. When the process completes you will see
+While the model is running the page shows a status message. When it completes you will see
 
-* A fit score and a simple label that describes the fit
-* A short explanation of why the job is a fit
-* The full generated resume as plain text on the page
-* A note showing which folder on disk contains the files for this job
+* A fit score and a short label
+* A short explanation of the fit
+* The full generated resume displayed as plain text
+* The folder name on disk where the files were written
 
 Each run creates a new folder under `job-packages` with a timestamped name. Inside that folder you will find
 
@@ -155,75 +208,59 @@ Each run creates a new folder under `job-packages` with a timestamped name. Insi
 
 You can open and edit any of these text files with your preferred editor.
 
----
-
-## System resources and models
-
-Simple Job Bot uses an Ollama model inside Docker. The experience depends on
-
-* Docker memory limit
-* Number of CPU cores given to Docker
-* The model you choose in `JOBBOT_MODEL`
-
-A practical baseline
-
-* Host machine with at least sixteen gigabytes of memory
-* Docker Desktop memory set to at least eight gigabytes
-* Four or more virtual CPUs allocated to Docker
-* Model `llama3.2:3b` for a good balance of quality and speed
-
-Larger models such as `llama3` with eight billion parameters require more memory inside the container. If Docker has too little memory you may see errors from Ollama that say the model requires more memory than is available. In that case either
-
-* increase the Docker memory limit in Docker Desktop settings, or
-* switch to a smaller model such as `llama3.2:3b` or `llama3.2:1b`
-
-To change the model that Simple Job Bot requests, edit `compose.yaml` and update the environment section for the application service
-
-```
-environment:
-  - OLLAMA_HOST=http://ollama:11434
-  - JOBBOT_MODEL=llama3.2:3b
-  - HOST_OUTPUT_ROOT=./job-packages
-```
-
-After editing `compose.yaml` restart the stack
-
-```
-docker compose down
-docker compose up -d
-```
-
----
-
 ## Data storage and privacy
 
-Two folders in this project are intended to remain local on your machine
+Two local folders are important
 
 * `job-packages`
-  Stores generated resumes, cover letters, short answers, and metadata
+
+  * Stores generated resumes, cover letters, answers, and metadata
 
 * `ollama`
-  Stores the downloaded model files used by the Ollama container
 
-These folders are listed in `.gitignore` so they are not committed if you use git. This keeps your job data and your local models out of your remote repository.
+  * Stores downloaded models used by the Ollama container
 
-A minimal `.gitignore` looks like
+These folders are listed in `.gitignore` so they are not committed if you use git. That keeps your job data and your local model files out of any remote repository.
 
-```
-__pycache__/
-*.pyc
+## License and open source components
 
-job-packages/
-ollama/
-```
+This project uses a custom non commercial license.
 
----
+Short version
 
-## Summary
+* Free for personal use
+* Not allowed for resale or hosted commercial services
+* No warranty
 
-Typical usage
+See the `LICENSE` file in the repository for the full text and conditions.
 
-```
+This project also makes use of several open source components, including but not limited to
+
+* Python and the standard library
+* FastAPI and Starlette
+* Uvicorn
+* Jinja2
+* httpx
+* The official `ollama/ollama` container image
+* Models served through Ollama such as Meta Llama
+
+Those components remain under their own respective licenses. By using this project you agree to follow the terms of those licenses as well.
+
+## Changelog snapshot
+
+Recent notable changes
+
+* Switched the default model to `llama3.2:3b` to improve performance on CPU
+* Split the application into `app` modules for routers, services, and models
+* Added stronger guardrails around truthfulness and two page resume length
+* Updated prompts to avoid AI flavored wording and to keep all experience while compressing older roles
+* Updated the README to reflect the current architecture and behavior
+
+## Summary flow
+
+Typical use looks like this
+
+```bash
 git clone https://github.com/nerdinthenord/SimpleJobBot.git
 cd SimpleJobBot
 docker compose up -d
@@ -231,8 +268,10 @@ docker compose up -d
 
 Then visit
 
-```
+```text
 http://localhost:8000
 ```
 
-Paste your resume and the job description, generate a package, and your editable text files for resume, cover letter, and short answers will be stored under `job-packages`.
+Paste your resume and the job description, generate a package, and you will get editable text files for resume, cover letter, and short answers for that role, all stored locally under `job-packages`.
+
+
