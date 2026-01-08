@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+from uuid import uuid4
 from typing import Dict, Any, List
 import json
 
@@ -143,10 +144,15 @@ def estimate_fit_score(job: JobInput) -> float:
 
 async def generate_full_package(job: JobInput) -> Dict[str, Any]:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_suffix = uuid4().hex[:8]
 
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
-    folder_name = f"{sanitize_part(job.company, 'company')}_{sanitize_part(job.title, 'title')}_{timestamp}"
+    folder_name = (
+        f"{sanitize_part(job.company, 'company')}_"
+        f"{sanitize_part(job.title, 'title')}_"
+        f"{timestamp}_{unique_suffix}"
+    )
     job_dir = OUTPUT_ROOT / folder_name
     job_dir.mkdir(parents=True, exist_ok=True)
 
